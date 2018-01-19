@@ -1,0 +1,33 @@
+#!/bin/bash
+START_1="/etc/init.d/tomcat1d"
+CONNECT_NUM=`lsof -i:8080|wc -l`
+DATE_1=`date +%F-%X`
+DATE_2=`date +%F`
+SCRIPT_DIR="/root/clean_connect/script"
+JUDGE=`echo $?`
+cd $SCRIPT_DIR
+echo "###############${DATE_2}###############################" >> $DATE_2.log
+echo "$DATE_1----开始每日定时重启任务,你可以在$SCRIPT_DIR中查看日志....."
+sleep 4
+if [ $CONNECT_NUM -gt 0 ]
+then
+echo "$DATE_1----连接数为 $CONNECT_NUM" >> $DATE_2.log
+sleep 2
+echo "$DATE_1 -----开始重启...." >> $DATE_2.log
+$START_1 restart >/dev/null 2>&1
+[ $JUDGE -eq 0 ] && {
+echo "$DATE_1 ----重启成功...." >> $DATE_2.log
+} || {
+echo "$DATE_1 ----重启失败...." >> $DATE_2.log
+exit 4444
+}
+else
+echo "$DATE_1 ----服务已经关闭,直接启动...." >> $DATE_2.log
+$START_1 start
+[ $JUDGE -eq 0 ] && {
+echo "$DATE_1 ----重启成功...." >> $DATE_2.log
+} || {
+echo "$DATE_1 ----重启失败...." >> $DATE_2.log
+exit 4444
+}
+fi
